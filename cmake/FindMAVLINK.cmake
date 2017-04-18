@@ -1,8 +1,9 @@
 INCLUDE(FindPackageHandleStandardArgs)
 INCLUDE(HandleLibraryTypes)
 
+#./../mavlink/include/mavlink/v1.0/
 SET(MAVLINK_IncludeSearchPaths
-  ./../mavlink/include/mavlink/v1.0/
+  /usr/local/include/mavlink/v1.0/
 )
 
 FIND_PATH(MAVLINK_INCLUDE_DIR

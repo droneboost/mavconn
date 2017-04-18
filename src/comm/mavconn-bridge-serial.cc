@@ -107,6 +107,8 @@ static void mavlink_handler (const lcm_recv_buf_t *rbuf, const char * channel,
 		const mavconn_mavlink_msg_container_t* container, void * user)
 {
 	const mavlink_message_t* msg = getMAVLinkMsgPtr(container);
+	//        printf("systemid: %d\n, pc2serial: %d\n, channel: %s\n, msg->msgid: %d\n, msg->sysid: %d\n, msg->compid: %d\n",
+        //        systemid, pc2serial, channel, msg->msgid, msg->sysid, msg->compid);
 
 	int fd = *(static_cast<int*>(user));
 	if (fd == -1)
@@ -125,29 +127,29 @@ static void mavlink_handler (const lcm_recv_buf_t *rbuf, const char * channel,
                         // IMU<->COMPUTER FILTER, filters out messages from LCM
 
 			// Only send messages which are in positiv list. This list contains all messages handled by IMU
-			if (       msg->msgid == MAVLINK_MSG_ID_SET_MODE
-					|| msg->msgid == MAVLINK_MSG_ID_HEARTBEAT
-					|| msg->msgid == MAVLINK_MSG_ID_COMMAND_LONG
-					|| msg->msgid == MAVLINK_MSG_ID_SYSTEM_TIME
-					|| msg->msgid == MAVLINK_MSG_ID_REQUEST_DATA_STREAM
-					|| msg->msgid == MAVLINK_MSG_ID_PARAM_REQUEST_LIST
-					|| msg->msgid == MAVLINK_MSG_ID_PARAM_SET
-					|| msg->msgid == MAVLINK_MSG_ID_IMAGE_TRIGGER_CONTROL
-					|| msg->msgid == MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE
-                    || msg->msgid == MAVLINK_MSG_ID_GLOBAL_VISION_POSITION_ESTIMATE
-					|| msg->msgid == MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE
-					|| msg->msgid == MAVLINK_MSG_ID_PING
-					|| msg->msgid == MAVLINK_MSG_ID_STATUSTEXT
-					|| msg->msgid == MAVLINK_MSG_ID_SET_LOCAL_POSITION_SETPOINT
-					|| msg->msgid == MAVLINK_MSG_ID_SET_GLOBAL_POSITION_SETPOINT_INT
-                    || msg->msgid == MAVLINK_MSG_ID_SET_POSITION_CONTROL_OFFSET
-                    || msg->msgid == MAVLINK_MSG_ID_OPTICAL_FLOW) {
+			if (   msg->msgid == MAVLINK_MSG_ID_SET_MODE
+                            || msg->msgid == MAVLINK_MSG_ID_HEARTBEAT
+	                    || msg->msgid == MAVLINK_MSG_ID_COMMAND_LONG
+                            || msg->msgid == MAVLINK_MSG_ID_SYSTEM_TIME
+                            || msg->msgid == MAVLINK_MSG_ID_REQUEST_DATA_STREAM
+                            || msg->msgid == MAVLINK_MSG_ID_PARAM_REQUEST_LIST
+                            || msg->msgid == MAVLINK_MSG_ID_PARAM_SET
+                            || msg->msgid == MAVLINK_MSG_ID_IMAGE_TRIGGER_CONTROL
+                            || msg->msgid == MAVLINK_MSG_ID_VISION_POSITION_ESTIMATE
+                            || msg->msgid == MAVLINK_MSG_ID_GLOBAL_VISION_POSITION_ESTIMATE
+                            || msg->msgid == MAVLINK_MSG_ID_VICON_POSITION_ESTIMATE
+                            || msg->msgid == MAVLINK_MSG_ID_PING
+                            || msg->msgid == MAVLINK_MSG_ID_STATUSTEXT
+                            || msg->msgid == MAVLINK_MSG_ID_SET_LOCAL_POSITION_SETPOINT
+			    || msg->msgid == MAVLINK_MSG_ID_SET_GLOBAL_POSITION_SETPOINT_INT
+                            || msg->msgid == MAVLINK_MSG_ID_SET_POSITION_CONTROL_OFFSET
+                            || msg->msgid == MAVLINK_MSG_ID_OPTICAL_FLOW) {
 				if (verbose || debug)
 					std::cout << std::dec
-							<< "Received and forwarded LCM message with id "
-							<< static_cast<unsigned int> (msg->msgid)
-							<< " from system " << static_cast<int> (msg->sysid)
-							<< std::endl;
+			                          << "Received and forwarded LCM message with id "
+						  << static_cast<unsigned int> (msg->msgid)
+					          << " from system " << static_cast<int> (msg->sysid)
+						  << std::endl;
 
 				// Send message over serial port
 				uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
@@ -190,11 +192,11 @@ static void mavlink_handler (const lcm_recv_buf_t *rbuf, const char * channel,
 			|| msg->msgid == MAVLINK_MSG_ID_ATTITUDE))
 		{
 			if (verbose || debug)
-					std::cout << std::dec
-							<< "Received and forwarded LCM message with id "
-							<< static_cast<unsigned int> (msg->msgid)
-							<< " from system " << static_cast<int> (msg->sysid)
-							<< std::endl;
+                               std::cout << std::dec
+                                   << "Received and forwarded LCM message with id "
+                                   << static_cast<unsigned int> (msg->msgid)
+                                   << " from system " << static_cast<int> (msg->sysid)
+                                   << std::endl;
 
 				// Send message over serial port
 				uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
@@ -203,7 +205,8 @@ static void mavlink_handler (const lcm_recv_buf_t *rbuf, const char * channel,
 				int written = write(fd, (char*)buffer, messageLength);
 				//ioctl(fd, TIOCFLUSH, FWRITE);
 				tcflush(fd, TCOFLUSH);
-				if (messageLength != written) fprintf(stderr, "ERROR: Wrote %d bytes but should have written %d\n", written, messageLength);
+				if (messageLength != written)
+				   fprintf(stderr, "ERROR: Wrote %d bytes but should have written %d\n", written, messageLength);
 		}
 
 		if (msg->msgid == MAVLINK_MSG_ID_PING)
@@ -223,15 +226,14 @@ static void mavlink_handler (const lcm_recv_buf_t *rbuf, const char * channel,
 
 void* lcm_wait(void* lcm_ptr)
 		{
-	lcm_t* lcm = (lcm_t*) lcm_ptr;
-	// Blocking wait for new data
-	while (1)
-	{
-		if (debug) printf("Waiting for LCM data\n");
-		lcm_handle (lcm);
-	}
-	return NULL;
-		}
+    lcm_t* lcm = (lcm_t*) lcm_ptr;
+    // Blocking wait for new data
+    while (1) {
+        if (debug) printf("Waiting for LCM data\n");
+        lcm_handle (lcm);
+    }
+    return NULL;
+}
 
 
 /**
@@ -487,7 +489,7 @@ void* serial_wait(void* serial_ptr)
 		// If a message could be decoded, handle it
 		if(msgReceived)
 		{
-			if (verbose || debug) std::cout << std::dec << "Received and forwarded serial port message with id " << static_cast<unsigned int>(message.msgid) << " from system " << static_cast<int>(message.sysid) << std::endl;
+		  if (verbose || debug) std::cout << std::dec << "Received and forwarded serial port message: msgid " << static_cast<unsigned int>(message.msgid) << " sysid " << static_cast<int>(message.sysid) << " compid " << static_cast<int>(message.compid) << std::endl;
 
 			// Do not send images over serial port
 
@@ -590,7 +592,8 @@ int main(int argc, char* argv[])
 	int* fd_ptr = &fd;
 
 	// SETUP LCM
-	lcm = lcm_create ("udpm://");
+        // Need to send LCM data to desktop PC side, so set ttl=1
+	lcm = lcm_create ("udpm://239.255.76.67:7667?ttl=1");
 	if (!lcm)
 	{
 		return 1;
@@ -657,35 +660,87 @@ int main(int argc, char* argv[])
 	// Static buffers
 	uint8_t buffer[MAVLINK_MAX_PACKET_LEN];
 	mavlink_message_t msg;
+
+        static int first_startup = 1;
 	while(1)
 	{
-			gettimeofday(&tv, NULL);
-			uint64_t currTime =  ((uint64_t)tv.tv_sec) * 1000000 + tv.tv_usec;
+            int messageLength = 0;
+            int written = 0;
+            gettimeofday(&tv, NULL);
+            uint64_t currTime =  ((uint64_t)tv.tv_sec) * 1000000 + tv.tv_usec;
 
-			if (currTime - lastTime > 2000000)
-			{
-				// SEND OUT TIME MESSAGE
-				// send message as close to time aquisition as possible
-				mavlink_msg_system_time_pack(systemid, compid, &msg, currTime, 0);
-				// Send message over serial port
-				int messageLength = mavlink_msg_to_send_buffer(buffer, &msg);
-				int written = write(fd, (char*)buffer, messageLength);
-				lastTime = currTime;
-				if (written != messageLength)
-				{
-					fprintf(stderr, "\nERROR: Unable to send system time over serial port.\n");
-				}
-			}
-		usleep(100000);
-	}
+            if (currTime - lastTime > 2000000)
+            {
+                // SEND OUT TIME MESSAGE
+                // send message as close to time aquisition as possible
+                mavlink_msg_system_time_pack(systemid, compid, &msg, currTime, 0);
+                // Send message over serial port
+                messageLength = mavlink_msg_to_send_buffer(buffer, &msg);
+                written = write(fd, (char*)buffer, messageLength);
+                lastTime = currTime;
+                if (written != messageLength)
+                {
+                    fprintf(stderr, "\nERROR: Unable to send system time over serial port.\n");
+                }
+            }
+            usleep(100000);
 
-	// Disconnect from LCM
-	mavconn_mavlink_msg_container_t_unsubscribe (lcm, comm_sub);
-	lcm_destroy (lcm);
-	close_port(fd);
+	    if (first_startup == 1) {
+                // send GCS heartbeat
+                memset(&msg, 0, sizeof(mavlink_message_t));
+                memset(buffer, 0, MAVLINK_MAX_PACKET_LEN);
+                first_startup = 0;
+                //  uint8_t system_id, uint8_t component_id, mavlink_message_t* msg,
+                //  uint8_t type, uint8_t autopilot, uint8_t base_mode, uint32_t custom_mode, uint8_t system_status
+                printf("Send GCS heartbeat to device.\n");
+                mavlink_msg_heartbeat_pack(systemid, compid, &msg, MAV_TYPE_GCS, MAV_AUTOPILOT_INVALID, 0, 0, 0);
+                int messageLength = mavlink_msg_to_send_buffer(buffer, &msg);
+                for (int i=0; i<messageLength; i++) {
+                    unsigned char v=buffer[i];
+                    fprintf(stderr,"%02x ", v);
+                }
+                fprintf(stderr,"\n");
 
-	g_thread_join(lcm_thread);
-	g_thread_join(serial_thread);
-	exit(0);
+                int written = write(fd, (char*)buffer, messageLength);
+                if (written != messageLength)
+                {
+                   fprintf(stderr, "\nERROR: Unable to send GCS heartbeat  over serial port.\n");
+                }
+                usleep(100000);
+
+                // send Data stream request to mavlink target device
+                memset(&msg, 0, sizeof(mavlink_message_t));
+                memset(buffer, 0, MAVLINK_MAX_PACKET_LEN);
+                first_startup = 0;
+                //  system_id, component_id, mavlink_message_t* msg,
+                //  target_system, target_component, req_stream_id, req_message_rate(16), start_stop
+                // 04 00 01 00 00 01 12 2c <- correct
+                // 00 00 04 00 01 01 5f c1 <- wrong
+                printf("Send data stream request to device.\n");
+                // mavlink_msg_request_data_stream_pack(systemid, compid, &msg, 0, 0, MAV_DATA_STREAM_ALL, 0, 1);
+                mavlink_msg_request_data_stream_pack(0xFF, 0, &msg, 1, 0, 0, 4, 1);
+                messageLength = mavlink_msg_to_send_buffer(buffer, &msg);
+                for (int i=0; i<messageLength; i++) {
+                    unsigned char v=buffer[i];
+                    fprintf(stderr,"%02x ", v);
+                }
+                fprintf(stderr,"\n");
+
+                written = write(fd, (char*)buffer, messageLength);
+                if (written != messageLength)
+                {
+                   fprintf(stderr, "\nERROR: Unable to send data stream request  over serial port.\n");
+                }
+                usleep(100000);
+	    }
+        }
+
+        // Disconnect from LCM
+        mavconn_mavlink_msg_container_t_unsubscribe (lcm, comm_sub);
+        lcm_destroy (lcm);
+        close_port(fd);
+
+        g_thread_join(lcm_thread);
+        g_thread_join(serial_thread);
+        exit(0);
 }
-
